@@ -4,9 +4,7 @@ import type { ContextMenuItem } from "@nuxt/ui";
 import CodeDisplay from "./CodeDisplay.vue";
 
 const copySuccess = ref<boolean>(false);
-
 const codeOpen = ref<boolean>(false);
-
 const items = ref<ContextMenuItem[][]>([
   [
     {
@@ -55,17 +53,27 @@ const { compCode, compName } = defineProps<{
     </template>
     <slot />
   </UContextMenu>
-  <UDrawer v-model:open="codeOpen" title="Component Code">
-    <template #body>
-      <div class="w-full flex">
-        <CodeDisplay
-          :name="compName"
-          :code="compCode"
-          class="m-0 grow w-full"
+  <UDrawer
+    v-model:open="codeOpen"
+    title="Component Code"
+    class="lg:w-2/3 mx-auto"
+    :handle="false"
+  >
+    <template #header>
+      <div class="flex justify-between items-center">
+        <h2 class="text-(--ui-text-highlighted) font-semibold">
+          Component Code
+        </h2>
+        <UButton
+          color="neutral"
+          variant="ghost"
+          icon="i-lucide-x"
+          @click="codeOpen = false"
         />
       </div>
     </template>
+    <template #body>
+      <CodeDisplay :name="compName" :code="compCode" class="m-0 grow w-full" />
+    </template>
   </UDrawer>
 </template>
-
-<style></style>

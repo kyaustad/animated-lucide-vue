@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import Prism from "prismjs";
-import "prismjs/themes/prism-twilight.css";
+import "prismjs/themes/prism-tomorrow.min.css";
+import "prismjs/components/prism-markup";
+import "prismjs/components/prism-javascript";
 
 const { code, name = "Component" } = defineProps<{
   code: string;
@@ -8,6 +10,13 @@ const { code, name = "Component" } = defineProps<{
 }>();
 
 const copySuccess = ref<boolean>(false);
+const codeElement = ref<HTMLElement | null>(null);
+
+const highlightCode = () => {
+  if (codeElement.value) {
+    Prism.highlightElement(codeElement.value);
+  }
+};
 
 const handleCopyCode = async () => {
   if (code) {
@@ -17,33 +26,49 @@ const handleCopyCode = async () => {
 };
 
 onMounted(() => {
-  Prism.highlightAll();
+  highlightCode();
 });
+
+watch(
+  () => code,
+  () => {
+    nextTick(() => {
+      highlightCode();
+    });
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
-  <div class="rounded-xl flex flex-col gap-4 w-full">
-    <div class="w-full justify-between flex">
-      <p class="text-gray-400">{{ name + ".vue" }}</p>
-      <UPopover>
-        <UButton
-          :icon="
-            copySuccess ? 'i-ph-check-square-offset-duotone' : 'i-ph-clipboard'
-          "
-          variant="soft"
-          @click="handleCopyCode"
-        />
-        <template #content>
-          <div class="flex flex-row justify-between p-2">
-            <p class="text-(--ui-primary) text-xs">Code Copied to Clipboard!</p>
-          </div>
-        </template>
-      </UPopover>
+  <div class="flex mx-auto">
+    <div class="rounded-xl flex flex-col w-full">
+      <div class="w-full justify-between items-center flex">
+        <p class="text-gray-400 text-sm">{{ name + ".vue" }}</p>
+        <UPopover>
+          <UButton
+            :icon="
+              copySuccess
+                ? 'i-ph-check-square-offset-duotone'
+                : 'i-ph-clipboard'
+            "
+            variant="ghost"
+            @click="handleCopyCode"
+          />
+          <template #content>
+            <div class="flex flex-row justify-between p-2">
+              <p class="text-(--ui-primary) text-xs">
+                Code Copied to Clipboard!
+              </p>
+            </div>
+          </template>
+        </UPopover>
+      </div>
+      <div class="relative">
+        <pre
+          class="bg-slate-600/20 rounded-xl p-2 max-h-[500px] overflow-auto"
+        ><code ref="codeElement" class="language-markup whitespace-pre">{{ code }}</code></pre>
+      </div>
     </div>
-    <pre
-      class="bg-slate-600/20 rounded-xl p-2 text-wrap language-typescript"
-    ><code ref="codeElement" class="language-typescript text-wrap">{{ code }}</code></pre>
   </div>
 </template>
-
-<style></style>
